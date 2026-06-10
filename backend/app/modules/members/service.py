@@ -22,6 +22,9 @@ def get_member(member_id: int) -> Member:
 
 
 def create_member(payload: MemberCreate) -> Member:
+    for existing in store.members.values():
+        if existing["phone"] == payload.phone:
+            raise HTTPException(status_code=400, detail="该手机号已注册会员")
     get_level(payload.level_id)
     member_id = store.next_id(store.members)
     member = {"id": member_id, **payload.model_dump()}
@@ -35,6 +38,10 @@ def update_member(member_id: int, payload: MemberUpdate) -> Member:
         raise HTTPException(status_code=404, detail="会员不存在")
 
     updates = payload.model_dump(exclude_unset=True)
+    if "phone" in updates:
+        for m in store.members.values():
+            if m["id"] != member_id and m["phone"] == updates["phone"]:
+                raise HTTPException(status_code=400, detail="该手机号已注册会员")
     if "level_id" in updates:
         get_level(updates["level_id"])
     existing.update(updates)
