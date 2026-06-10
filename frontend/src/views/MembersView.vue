@@ -73,7 +73,14 @@
         </label>
         <label>
           手机号
-          <input v-model="form.phone" required placeholder="请输入手机号" />
+          <input
+            v-model="form.phone"
+            required
+            placeholder="请输入11位手机号码"
+            :class="{ 'input-error': phoneError }"
+            @input="validatePhone"
+          />
+          <span v-if="phoneError" class="field-error">{{ phoneError }}</span>
         </label>
         <label>
           会员等级
@@ -110,6 +117,8 @@ import MessageBanner from '../components/MessageBanner.vue'
 import StatCard from '../components/StatCard.vue'
 import { keepList } from '../utils/dataState'
 
+const PHONE_REGEX = /^1[3-9]\d{9}$/
+
 const members = ref([...fallbackMembers])
 const levels = ref([...fallbackLevels])
 const favoriteText = ref('')
@@ -118,12 +127,26 @@ const messageType = ref('success')
 const keyword = ref('')
 const levelFilter = ref(0)
 const selectedMember = ref(null)
+const phoneError = ref('')
 const form = reactive({
   name: '',
   phone: '',
   level_id: 1,
   points: 0,
 })
+
+function validatePhone() {
+  if (!form.phone) {
+    phoneError.value = ''
+    return true
+  }
+  if (!PHONE_REGEX.test(form.phone)) {
+    phoneError.value = '请输入11位有效的手机号码'
+    return false
+  }
+  phoneError.value = ''
+  return true
+}
 
 const filteredMembers = computed(() => {
   const text = keyword.value.trim().toLowerCase()
@@ -154,6 +177,9 @@ async function loadData() {
 }
 
 async function submit() {
+  if (!validatePhone()) {
+    return
+  }
   try {
     await memberApi.create({
       ...form,
@@ -164,12 +190,17 @@ async function submit() {
     })
     Object.assign(form, { name: '', phone: '', points: 0, level_id: levels.value[0]?.id || 1 })
     favoriteText.value = ''
+    phoneError.value = ''
     message.value = '会员已保存'
     messageType.value = 'success'
     await loadData()
   } catch (error) {
     message.value = error.message
     messageType.value = 'error'
+    if (error.message.includes('手机号已注册')) {
+      form.phone = ''
+      phoneError.value = error.message
+    }
   }
 }
 

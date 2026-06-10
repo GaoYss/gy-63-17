@@ -343,6 +343,18 @@ select {
   background: #fff;
 }
 
+.input-error {
+  border-color: #b42318;
+  background: #fff1f0;
+}
+
+.field-error {
+  color: #b42318;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: -4px;
+}
+
 .primary-button,
 .secondary-button {
   border: 0;
