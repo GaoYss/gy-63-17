@@ -207,6 +207,8 @@ async function submit() {
     if (error.message.includes('手机号已注册')) {
       form.phone = ''
       phoneError.value = error.message
+    } else if (error.message.includes('手机号格式') || error.message.includes('手机号码')) {
+      phoneError.value = error.message
     }
   } finally {
     submitting.value = false
