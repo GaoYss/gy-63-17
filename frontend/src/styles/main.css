@@ -374,6 +374,11 @@ select {
   color: #236229;
 }
 
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .message-banner {
   margin-bottom: 12px;
   padding: 10px 12px;

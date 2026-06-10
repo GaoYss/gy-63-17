@@ -98,7 +98,9 @@
           偏好分类
           <input v-model="favoriteText" placeholder="用逗号分隔，如 柑橘,莓果" />
         </label>
-        <button class="primary-button" type="submit">保存会员</button>
+        <button class="primary-button" type="submit" :disabled="submitting">
+          {{ submitting ? '保存中...' : '保存会员' }}
+        </button>
       </form>
     </section>
   </div>
@@ -128,6 +130,7 @@ const keyword = ref('')
 const levelFilter = ref(0)
 const selectedMember = ref(null)
 const phoneError = ref('')
+const submitting = ref(false)
 const form = reactive({
   name: '',
   phone: '',
@@ -180,6 +183,10 @@ async function submit() {
   if (!validatePhone()) {
     return
   }
+  if (submitting.value) {
+    return
+  }
+  submitting.value = true
   try {
     await memberApi.create({
       ...form,
@@ -201,6 +208,8 @@ async function submit() {
       form.phone = ''
       phoneError.value = error.message
     }
+  } finally {
+    submitting.value = false
   }
 }
 
